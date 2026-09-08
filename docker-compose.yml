@@ -1,0 +1,41 @@
+services:
+  mongodb:
+    image: mongo:7
+    container_name: global-upvc-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - global-upvc-data:/data/db
+
+  server:
+    build:
+      context: ./server
+    container_name: global-upvc-server
+    restart: unless-stopped
+    env_file:
+      - ./server/.env
+    environment:
+      PORT: 5000
+      MONGODB_URI: mongodb://mongodb:27017/global-upvc
+      ALLOWED_ORIGINS: http://localhost:3000
+    depends_on:
+      - mongodb
+    ports:
+      - "5000:5000"
+
+  client:
+    build:
+      context: ./client
+    container_name: global-upvc-client
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:5000
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+    depends_on:
+      - server
+    ports:
+      - "3000:3000"
+
+volumes:
+  global-upvc-data:
