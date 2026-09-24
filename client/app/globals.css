@@ -10,19 +10,19 @@
 }
 
 @layer components {
-  .shell { @apply mx-auto w-full max-w-[1280px] px-5 sm:px-8 lg:px-10; }
+  .shell { @apply mx-auto w-full max-w-[1280px] px-4 min-[360px]:px-5 sm:px-8 lg:px-10; }
   .section-space { @apply py-20 lg:py-28; }
   .eyebrow { @apply font-heading text-[11px] font-bold uppercase tracking-[.18em] text-accent; }
-  .button { @apply inline-flex min-h-12 items-center justify-center gap-3 border px-6 py-3 font-heading text-sm font-bold transition-all duration-200 hover:shadow-md active:scale-95; }
+  .button { @apply inline-flex min-h-12 max-w-full items-center justify-center gap-3 border px-4 py-3 text-center font-heading text-sm font-bold transition-all duration-200 hover:shadow-md active:scale-95 sm:px-6; }
   .button-primary { @apply border-accent-deep bg-accent-deep text-panel hover:border-coral hover:bg-coral hover:shadow-lg; }
   .button-outline { @apply border-ink bg-transparent text-ink hover:border-accent-deep hover:bg-accent-deep hover:text-panel hover:shadow-md; }
   .nav-link { @apply font-heading text-sm font-semibold text-ink-soft transition-colors hover:text-accent-deep; }
   .focus-ring { @apply outline-none focus-visible:ring-2 focus-visible:ring-brass focus-visible:ring-offset-2 focus-visible:ring-offset-background; }
-  .product-card { @apply relative min-h-64 border border-line bg-panel p-7 transition-all duration-300 hover:bg-background hover:border-accent hover:shadow-lg hover:-translate-y-1; }
+  .product-card { @apply relative min-h-64 border border-line bg-panel p-7 transition-colors duration-200 hover:bg-background; }
   .corner-joint { @apply absolute bottom-4 right-4 h-5 w-5 border-b-2 border-r-2 border-brass; }
   .outline-number { font-family: var(--font-space-grotesk); font-size: 3.25rem; line-height: 1; font-weight: 700; color: transparent; -webkit-text-stroke: 1px #B08549; }
   .field-label { @apply grid gap-2 text-sm font-semibold; }
-  .field { @apply w-full border border-line bg-background px-4 py-3 font-body text-base font-normal text-ink outline-none placeholder:text-ink-soft/60 transition-colors duration-200 focus-visible:border-accent focus-visible:bg-white; }
+  .field { @apply block min-w-0 max-w-full border border-line bg-background px-3 py-3 font-body text-base font-normal text-ink outline-none placeholder:text-ink-soft/60 transition-colors duration-200 focus-visible:border-accent focus-visible:bg-white sm:px-4; }
   .contact-link { @apply underline decoration-line underline-offset-4 transition-colors hover:text-accent-deep hover:decoration-accent-deep; }
   .legal-copy { @apply grid gap-4 leading-7 text-ink-soft; }
   .legal-copy h2 { @apply mt-6 font-heading text-2xl font-semibold text-ink; }
@@ -30,17 +30,17 @@
   .window-mark > span { background: linear-gradient(145deg, #d8ebf2 0%, #8fc1d7 100%); }
 }
 
-.hero-window { animation: window-in 900ms cubic-bezier(.2,.8,.2,1) both; }
 .nav-link { @apply relative font-heading text-sm font-semibold text-ink-soft transition-all duration-200 hover:text-accent-deep; }
 .nav-link::after { @apply absolute -bottom-1 left-0 h-0.5 w-0 bg-accent-deep transition-all duration-300; content: ''; }
 .nav-link:hover::after { @apply w-full; }
-.hero-shell { background: radial-gradient(circle at 82% 32%, rgba(228,108,91,.16), transparent 19rem), radial-gradient(circle at 58% 100%, rgba(22,138,145,.14), transparent 24rem); }
-.hero-window { filter: drop-shadow(0 20px 24px rgba(8,112,120,.12)); }
-.hero-window::before { content: ""; position: absolute; inset: 8%; border: 1px solid rgba(228,108,91,.35); border-radius: 999px; transform: rotate(-12deg); pointer-events: none; }
-.cta-road { background: linear-gradient(135deg, #087078 0%, #168A91 58%, #E46C5B 150%); }
-.cta-road::before, .cta-road::after { content: ""; position: absolute; bottom: -35%; left: 50%; width: 14%; height: 125%; border-left: 2px solid rgba(255,255,255,.1); border-right: 2px solid rgba(255,255,255,.1); transform-origin: top center; }
-.cta-road::before { transform: translateX(-50%) perspective(300px) rotateX(20deg) skewX(-28deg); }
-.cta-road::after { width: 5rem; height: 4rem; bottom: 44%; transform: translateX(-50%); border: 2px solid rgba(255,255,255,.09); border-top: none; }
+.shell, main, section, article, form, nav { min-width: 0; }
+img, video, iframe { max-width: 100%; }
+@media (max-width: 380px) {
+  .shell { padding-left: 1rem; padding-right: 1rem; }
+  .section-space { padding-top: 3.5rem; padding-bottom: 3.5rem; }
+}
+.cta-road { background: #087078; }
+.cta-road::before, .cta-road::after { display: none; }
 @keyframes window-in { from { opacity: 0; transform: translateY(24px) scale(.96); } to { opacity: 1; transform: none; } }
 @keyframes fade-in-up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes slide-in-right { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }

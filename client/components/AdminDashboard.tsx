@@ -135,14 +135,14 @@ export function AdminDashboard() {
         </header>
         <div className="mb-6 grid gap-3 sm:grid-cols-3"><Metric label="New leads" value={stats?.byStatus.new ?? newCount} /><Metric label="Quotes sent" value={stats?.byStatus.quoted ?? 0} /><Metric label="Overdue follow-ups" value={stats?.overdueFollowUps ?? 0} urgent /></div>
 
-        <div className="mb-6 grid gap-3 rounded-[22px] border border-line bg-panel p-4 shadow-sm sm:grid-cols-[1fr_auto]">
+        <div className="mb-6 grid min-w-0 gap-3 rounded-[22px] border border-line bg-panel p-4 shadow-sm sm:grid-cols-[minmax(0,1fr)_auto]">
           <label className="field-label">
             <span className="sr-only">Search enquiries</span>
             <input className="field focus-ring" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search name, phone, location or message" />
           </label>
           <label className="field-label">
             <span className="sr-only">Filter by status</span>
-            <select className="field min-w-44 focus-ring" value={filter} onChange={(event) => setFilter(event.target.value as typeof filter)}>
+            <select className="field min-w-0 sm:min-w-44 focus-ring" value={filter} onChange={(event) => setFilter(event.target.value as typeof filter)}>
               <option value="all">All statuses</option>
               <option value="new">New</option>
               <option value="contacted">Contacted</option>
@@ -202,7 +202,7 @@ function EnquiryCard({ enquiry, updateStatus, saveDetails, assign, remove }: { e
 
   return (
     <article className="rounded-[26px] border border-line bg-panel p-5 shadow-[0_12px_35px_rgba(8,19,25,0.05)] sm:p-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
+      <div className="flex min-w-0 flex-col items-stretch justify-between gap-4 sm:flex-row sm:items-start">
         <div>
           <div className="flex flex-wrap items-center gap-3">
             <h2 className="font-heading text-xl font-semibold text-ink">{enquiry.name}</h2>
@@ -212,10 +212,10 @@ function EnquiryCard({ enquiry, updateStatus, saveDetails, assign, remove }: { e
           <p className="mt-1 text-xs text-ink-soft">{new Intl.DateTimeFormat("en-NP", { dateStyle: "medium", timeStyle: "short" }).format(new Date(enquiry.createdAt))}</p>
         </div>
 
-        <div className="flex items-start gap-2">
+        <div className="flex flex-wrap items-start gap-2">
           <label>
             <span className="sr-only">Status for {enquiry.name}</span>
-            <select className="field min-w-[150px] py-2 text-sm focus-ring" value={enquiry.status || "new"} onChange={(event) => updateStatus(enquiry._id, event.target.value as EnquiryStatus)}>
+          <select className="field min-w-0 py-2 text-sm focus-ring sm:min-w-[150px]" value={enquiry.status || "new"} onChange={(event) => updateStatus(enquiry._id, event.target.value as EnquiryStatus)}>
               <option value="new">New</option>
               <option value="contacted">Contacted</option>
               <option value="survey-booked">Survey booked</option>
@@ -234,7 +234,7 @@ function EnquiryCard({ enquiry, updateStatus, saveDetails, assign, remove }: { e
       {Boolean(enquiry.activity?.length) && <details className="mt-5 border-t border-line pt-4"><summary className="cursor-pointer text-sm font-semibold">Activity history ({enquiry.activity?.length})</summary><ol className="mt-3 grid gap-2">{[...(enquiry.activity || [])].reverse().map((entry, index) => <li key={`${entry.at}-${index}`} className="text-xs text-ink-soft">{new Intl.DateTimeFormat("en-NP", { dateStyle: "medium", timeStyle: "short" }).format(new Date(entry.at))} · {entry.value}</li>)}</ol></details>}
       {(enquiry.projectType || enquiry.location || enquiry.dimensions || enquiry.budget || enquiry.preferredVisitAt) && <dl className="mt-5 grid gap-3 rounded-xl bg-background/60 p-4 text-sm sm:grid-cols-2"><Detail label="Service" value={enquiry.projectType} /><Detail label="Location" value={enquiry.location} /><Detail label="Sizes / quantity" value={enquiry.dimensions} /><Detail label="Budget" value={enquiry.budget} /><Detail label="Preferred visit" value={enquiry.preferredVisitAt ? new Intl.DateTimeFormat("en-NP", { dateStyle: "medium", timeStyle: "short" }).format(new Date(enquiry.preferredVisitAt)) : ""} /><Detail label="Source" value={enquiry.source} /></dl>}
 
-      <div className="mt-5 grid gap-4 border-t border-line pt-5 md:grid-cols-[minmax(0,1.7fr)_minmax(210px,240px)_auto] md:items-end">
+      <div className="mt-5 grid min-w-0 gap-4 border-t border-line pt-5 md:grid-cols-[minmax(0,1.7fr)_minmax(0,240px)_auto] md:items-end">
         <label className="field-label">
           Private admin notes
           <textarea className="field min-h-24 resize-y focus-ring" maxLength={2000} value={notes} onChange={(event) => setNotes(event.target.value)} />

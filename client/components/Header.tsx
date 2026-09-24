@@ -17,9 +17,9 @@ export function Header() {
   const translations: Record<string, [string, string]> = { Products: ["Products", "उत्पादनहरू"], "Why Us": ["Why Us", "हामी किन"], Process: ["Process", "प्रक्रिया"], Gallery: ["Gallery", "ग्यालरी"], "Planning guide": ["Planning guide", "योजना मार्गदर्शिका"], "Get a Quote": ["Get a Quote", "मूल्य माग्नुहोस्"] };
   const label = (value: string) => translations[value]?.[language === "en" ? 0 : 1] || value;
   return (
-    <header className="sticky top-0 z-50 border-b border-line bg-background/95 backdrop-blur-md shadow-sm">
+    <header className="sticky top-0 z-50 border-b border-line bg-[#f8faf8]/95 backdrop-blur-md">
       <div className="shell flex h-[72px] items-center justify-between">
-        <a href="/" className="group flex items-center gap-3 font-heading text-sm font-bold leading-tight tracking-tight transition-transform hover:scale-105 focus-ring" aria-label="Global UPVC home">
+        <a href="/" className="group flex items-center gap-3 font-heading text-sm font-bold leading-tight tracking-tight focus-ring" aria-label="Global UPVC home">
           <WindowMark className="h-9 w-9 transition-transform group-hover:scale-110" />
           <span>GLOBAL UPVC<br /><span className="font-body text-[10px] font-semibold tracking-[.15em] text-ink-soft">WINDOWS &amp; PREFAB</span></span>
         </a>
@@ -34,10 +34,12 @@ export function Header() {
           <span className={`block h-px w-5 bg-ink transition-all duration-300 ${open ? "-rotate-45 -translate-y-2" : ""}`} aria-hidden="true" />
         </button>
       </div>
-      <nav id="mobile-menu" className={`transform transition-all duration-300 origin-top ${open ? "visible opacity-100 scale-y-100" : "invisible opacity-0 scale-y-95"} border-t border-line bg-panel px-5 py-5 md:hidden`} aria-label="Mobile navigation">
+      <nav id="mobile-menu" inert={!open} className={`grid origin-top overflow-hidden border-line bg-panel px-5 transition-[grid-template-rows,padding,border-color] duration-300 md:hidden ${open ? "grid-rows-[1fr] border-t py-5" : "pointer-events-none grid-rows-[0fr] border-t-0 py-0"}`} aria-label="Mobile navigation">
+        <div className="min-h-0 overflow-hidden">
         {links.map(([linkLabel, href]) => <a onClick={() => setOpen(false)} className="block border-b border-line py-3 font-heading font-semibold transition-colors hover:text-accent-deep focus-ring" href={href} key={href}>{label(linkLabel)}</a>)}
         <button className="mt-4 w-full py-2 font-semibold" onClick={() => setLanguage(language === "en" ? "ne" : "en")}>{language === "en" ? "नेपालीमा हेर्नुहोस्" : "View in English"}</button>
         <a onClick={() => setOpen(false)} className="button button-primary mt-5 w-full justify-center focus-ring" href="/#contact">{label("Get a Quote")}</a>
+        </div>
       </nav>
     </header>
   );
