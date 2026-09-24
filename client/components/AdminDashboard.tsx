@@ -2,8 +2,9 @@
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 
-type EnquiryStatus = "new" | "contacted" | "archived";
-type Enquiry = { _id: string; name: string; phone: string; message: string; status?: EnquiryStatus; adminNotes?: string; followUpAt?: string | null; createdAt: string };
+type EnquiryStatus = "new" | "contacted" | "survey-booked" | "quoted" | "won" | "lost" | "archived";
+type Enquiry = { _id: string; name: string; phone: string; message: string; projectType?: string; location?: string; dimensions?: string; budget?: string; preferredVisitAt?: string | null; source?: string; status?: EnquiryStatus; adminNotes?: string; followUpAt?: string | null; assignedTo?: string; activity?: { type: string; value: string; at: string }[]; createdAt: string };
+type Stats = { total: number; overdueFollowUps: number; byStatus: Partial<Record<EnquiryStatus, number>> };
 const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/$/, "");
 
 export function AdminDashboard() {
@@ -14,6 +15,8 @@ export function AdminDashboard() {
   const [message, setMessage] = useState("");
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | EnquiryStatus>("all");
+  const [page, setPage] = useState(1);
+  const [stats, setStats] = useState<Stats | null>(null);
 
   const logout = useCallback(() => {
     sessionStorage.removeItem("global-upvc-admin-token");
@@ -23,10 +26,11 @@ export function AdminDashboard() {
   const loadEnquiries = useCallback(async (authToken: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`${apiUrl}/api/enquiries`, { headers: { Authorization: `Bearer ${authToken}` } });
+      const [response, statsResponse] = await Promise.all([fetch(`${apiUrl}/api/enquiries?limit=100`, { headers: { Authorization: `Bearer ${authToken}` } }), fetch(`${apiUrl}/api/enquiries/stats`, { headers: { Authorization: `Bearer ${authToken}` } })]);
       if (response.status === 401) { logout(); throw new Error("Your session expired. Please sign in again."); }
       if (!response.ok) throw new Error("Could not load enquiries.");
       setEnquiries(await response.json());
+      if (statsResponse.ok) setStats(await statsResponse.json());
     } catch (error) { setMessage(error instanceof Error ? error.message : "Could not load enquiries."); }
     finally { setLoading(false); }
   }, [logout]);
@@ -72,6 +76,15 @@ export function AdminDashboard() {
     setMessage("Admin notes saved.");
   }
 
+  async function assignEnquiry(id: string, assignedTo: string) {
+    if (!token) return;
+    const response = await fetch(`${apiUrl}/api/enquiries/${id}`, { method: "PATCH", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify({ assignedTo }) });
+    if (response.status === 401) { logout(); return; }
+    if (!response.ok) { setMessage("Could not update assignment."); return; }
+    const updated: Enquiry = await response.json();
+    setEnquiries((current) => current.map((item) => item._id === id ? updated : item));
+  }
+
   function exportCsv() {
     const escape = (value: unknown) => `"${String(value ?? "").replaceAll('"', '""')}"`;
     const rows = [["Submitted", "Name", "Phone", "Status", "Follow up", "Message", "Admin notes"], ...visible.map((item) => [item.createdAt, item.name, item.phone, item.status || "new", item.followUpAt || "", item.message, item.adminNotes || ""])];
@@ -94,6 +107,9 @@ export function AdminDashboard() {
     const term = search.trim().toLowerCase();
     return matchesFilter && (!term || `${enquiry.name} ${enquiry.phone} ${enquiry.message}`.toLowerCase().includes(term));
   }), [enquiries, filter, search]);
+  const pageSize = 10;
+  const pageCount = Math.max(1, Math.ceil(visible.length / pageSize));
+  const paged = visible.slice((page - 1) * pageSize, page * pageSize);
 
   if (!ready) return <div className="shell py-20 text-ink-soft">Loading admin…</div>;
   if (!token) return <LoginForm login={login} loading={loading} message={message} />;
@@ -108,7 +124,7 @@ export function AdminDashboard() {
             <div>
               <p className="eyebrow">Private dashboard</p>
               <h1 className="mt-3 font-heading text-3xl font-semibold tracking-tight sm:text-4xl">Customer enquiries</h1>
-              <p className="mt-3 text-sm text-ink-soft sm:text-base">{enquiries.length} total · {newCount} new</p>
+              <p className="mt-3 text-sm text-ink-soft sm:text-base">{stats?.total ?? enquiries.length} total · {newCount} new</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <button className="button button-outline focus-ring" onClick={exportCsv}>Export CSV</button>
@@ -117,6 +133,7 @@ export function AdminDashboard() {
             </div>
           </div>
         </header>
+        <div className="mb-6 grid gap-3 sm:grid-cols-3"><Metric label="New leads" value={stats?.byStatus.new ?? newCount} /><Metric label="Quotes sent" value={stats?.byStatus.quoted ?? 0} /><Metric label="Overdue follow-ups" value={stats?.overdueFollowUps ?? 0} urgent /></div>
 
         <div className="mb-6 grid gap-3 rounded-[22px] border border-line bg-panel p-4 shadow-sm sm:grid-cols-[1fr_auto]">
           <label className="field-label">
@@ -129,6 +146,10 @@ export function AdminDashboard() {
               <option value="all">All statuses</option>
               <option value="new">New</option>
               <option value="contacted">Contacted</option>
+              <option value="survey-booked">Survey booked</option>
+              <option value="quoted">Quoted</option>
+              <option value="won">Won</option>
+              <option value="lost">Lost</option>
               <option value="archived">Archived</option>
             </select>
           </label>
@@ -140,15 +161,18 @@ export function AdminDashboard() {
           {visible.length === 0 && !loading ? (
             <div className="rounded-[24px] border border-line bg-panel p-10 text-center text-ink-soft shadow-sm">No enquiries match this view.</div>
           ) : (
-            visible.map((enquiry) => (
-              <EnquiryCard key={enquiry._id} enquiry={enquiry} updateStatus={updateStatus} saveDetails={saveAdminDetails} remove={removeEnquiry} />
+            paged.map((enquiry) => (
+              <EnquiryCard key={enquiry._id} enquiry={enquiry} updateStatus={updateStatus} saveDetails={saveAdminDetails} assign={assignEnquiry} remove={removeEnquiry} />
             ))
           )}
         </div>
+        {pageCount > 1 && <div className="mt-6 flex items-center justify-center gap-4"><button className="button button-outline focus-ring" disabled={page === 1} onClick={() => setPage((value) => value - 1)}>Previous</button><span className="text-sm text-ink-soft">Page {page} of {pageCount}</span><button className="button button-outline focus-ring" disabled={page === pageCount} onClick={() => setPage((value) => value + 1)}>Next</button></div>}
       </div>
     </section>
   );
 }
+
+function Metric({ label, value, urgent = false }: { label: string; value: number; urgent?: boolean }) { return <div className={`rounded-[20px] border p-4 shadow-sm ${urgent && value > 0 ? "border-coral/40 bg-[#fff0e4]" : "border-line bg-panel"}`}><p className="text-xs font-bold uppercase tracking-wider text-ink-soft">{label}</p><p className="mt-2 font-heading text-3xl font-semibold">{value}</p></div>; }
 
 function LoginForm({ login, loading, message }: { login: (event: FormEvent<HTMLFormElement>) => void; loading: boolean; message: string }) {
   return (
@@ -172,7 +196,7 @@ function LoginForm({ login, loading, message }: { login: (event: FormEvent<HTMLF
   );
 }
 
-function EnquiryCard({ enquiry, updateStatus, saveDetails, remove }: { enquiry: Enquiry; updateStatus: (id: string, status: EnquiryStatus) => void; saveDetails: (id: string, notes: string, followUpAt: string) => void; remove: (enquiry: Enquiry) => void }) {
+function EnquiryCard({ enquiry, updateStatus, saveDetails, assign, remove }: { enquiry: Enquiry; updateStatus: (id: string, status: EnquiryStatus) => void; saveDetails: (id: string, notes: string, followUpAt: string) => void; assign: (id: string, assignedTo: string) => void; remove: (enquiry: Enquiry) => void }) {
   const [notes, setNotes] = useState(enquiry.adminNotes || "");
   const [followUp, setFollowUp] = useState(enquiry.followUpAt ? new Date(enquiry.followUpAt).toISOString().slice(0, 16) : "");
 
@@ -194,6 +218,10 @@ function EnquiryCard({ enquiry, updateStatus, saveDetails, remove }: { enquiry: 
             <select className="field min-w-[150px] py-2 text-sm focus-ring" value={enquiry.status || "new"} onChange={(event) => updateStatus(enquiry._id, event.target.value as EnquiryStatus)}>
               <option value="new">New</option>
               <option value="contacted">Contacted</option>
+              <option value="survey-booked">Survey booked</option>
+              <option value="quoted">Quoted</option>
+              <option value="won">Won</option>
+              <option value="lost">Lost</option>
               <option value="archived">Archived</option>
             </select>
           </label>
@@ -202,6 +230,9 @@ function EnquiryCard({ enquiry, updateStatus, saveDetails, remove }: { enquiry: 
       </div>
 
       <p className="mt-6 whitespace-pre-wrap border-l-2 border-brass bg-background/40 pl-4 leading-7 text-ink-soft">{enquiry.message}</p>
+      <label className="field-label mt-5 block max-w-sm">Assigned staff member<input className="field focus-ring" value={enquiry.assignedTo || ""} onChange={(event) => assign(enquiry._id, event.target.value)} placeholder="Enter a staff name" /></label>
+      {Boolean(enquiry.activity?.length) && <details className="mt-5 border-t border-line pt-4"><summary className="cursor-pointer text-sm font-semibold">Activity history ({enquiry.activity?.length})</summary><ol className="mt-3 grid gap-2">{[...(enquiry.activity || [])].reverse().map((entry, index) => <li key={`${entry.at}-${index}`} className="text-xs text-ink-soft">{new Intl.DateTimeFormat("en-NP", { dateStyle: "medium", timeStyle: "short" }).format(new Date(entry.at))} · {entry.value}</li>)}</ol></details>}
+      {(enquiry.projectType || enquiry.location || enquiry.dimensions || enquiry.budget || enquiry.preferredVisitAt) && <dl className="mt-5 grid gap-3 rounded-xl bg-background/60 p-4 text-sm sm:grid-cols-2"><Detail label="Service" value={enquiry.projectType} /><Detail label="Location" value={enquiry.location} /><Detail label="Sizes / quantity" value={enquiry.dimensions} /><Detail label="Budget" value={enquiry.budget} /><Detail label="Preferred visit" value={enquiry.preferredVisitAt ? new Intl.DateTimeFormat("en-NP", { dateStyle: "medium", timeStyle: "short" }).format(new Date(enquiry.preferredVisitAt)) : ""} /><Detail label="Source" value={enquiry.source} /></dl>}
 
       <div className="mt-5 grid gap-4 border-t border-line pt-5 md:grid-cols-[minmax(0,1.7fr)_minmax(210px,240px)_auto] md:items-end">
         <label className="field-label">
@@ -217,3 +248,5 @@ function EnquiryCard({ enquiry, updateStatus, saveDetails, remove }: { enquiry: 
     </article>
   );
 }
+
+function Detail({ label, value }: { label: string; value?: string }) { return value ? <div><dt className="text-xs font-bold uppercase tracking-wider text-ink-soft">{label}</dt><dd className="mt-1 font-medium text-ink">{value}</dd></div> : null; }

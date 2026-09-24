@@ -138,13 +138,7 @@ export function ContactForm() {
     event.preventDefault();
     const form = event.currentTarget;
     const values = Object.fromEntries(new FormData(form));
-    const message = [
-      `Project type: ${String(values.projectType)}`,
-      values.location ? `Project location: ${String(values.location)}` : "",
-      "",
-      String(values.message),
-    ].filter(Boolean).join("\n");
-    const data = { name: values.name, phone: values.phone, message, website: values.website };
+    const data = { name: values.name, phone: values.phone, message: values.message, website: values.website, projectType: values.projectType, location: values.location, dimensions: values.dimensions, budget: values.budget, preferredVisitAt: values.preferredVisitAt, source: "Website" };
     setStatus({ type: "loading", message: "Sending your enquiry…" });
     try {
       const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") || "http://localhost:5000";
@@ -169,6 +163,8 @@ export function ContactForm() {
       <label className="field-label">Phone<input className="field focus-ring rounded-sm" name="phone" required minLength={7} maxLength={25} autoComplete="tel" inputMode="tel" /></label>
       <label className="field-label">Project type<select className="field focus-ring rounded-sm" name="projectType" defaultValue="" required><option value="" disabled>Select a service</option><option>UPVC windows</option><option>UPVC doors</option><option>Prefabricated home</option><option>Hardware & fittings</option><option>Glass work</option><option>Site consultation</option><option>Other</option></select></label>
       <label className="field-label">Project location <span className="font-normal text-ink-soft">(optional)</span><select className="field focus-ring rounded-sm" name="location" defaultValue=""><option value="">Select a province, district, or city</option>{NEPAL_LOCATIONS.map((location, index) => <option key={`${location}-${index}`} value={location}>{location}</option>)}</select></label>
+      <div className="grid gap-5 sm:grid-cols-2"><label className="field-label">Approx. sizes / quantity <span className="font-normal text-ink-soft">(optional)</span><input className="field focus-ring rounded-sm" name="dimensions" maxLength={500} placeholder="e.g. 6 windows, 4 × 5 ft" /></label><label className="field-label">Indicative budget <span className="font-normal text-ink-soft">(optional)</span><select className="field focus-ring rounded-sm" name="budget" defaultValue=""><option value="">Select a range</option><option>Under NPR 100,000</option><option>NPR 100,000–300,000</option><option>NPR 300,000–700,000</option><option>Over NPR 700,000</option><option>Prefer to discuss</option></select></label></div>
+      <label className="field-label">Preferred site-visit time <span className="font-normal text-ink-soft">(optional)</span><input className="field focus-ring rounded-sm" name="preferredVisitAt" type="datetime-local" /></label>
       <label className="field-label">What do you need?<textarea className="field min-h-32 resize-y focus-ring rounded-sm" name="message" required minLength={10} maxLength={1800} placeholder="Number of openings, approximate sizes, plot details, or questions…" /></label>
       <button className="button button-primary w-full rounded-sm focus-ring disabled:cursor-wait disabled:opacity-70" disabled={status.type === "loading"} type="submit">{status.type === "loading" ? "Sending…" : "Send Enquiry"}</button>
       <p className={`min-h-6 text-sm font-medium transition-all duration-300 ${status.type === "error" ? "text-red-600" : status.type === "success" ? "text-accent-deep" : "text-ink-soft"}`} role="status" aria-live="polite">{status.message}</p>

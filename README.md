@@ -72,6 +72,17 @@ The admin API uses an eight-hour signed bearer token. `GET /api/enquiries`, `PAT
 - Restrict CORS to the production website origin.
 - Build everything with `npm run build` or check TypeScript with `npm run typecheck`.
 
+## Lead operations and launch checklist
+
+- New enquiry alerts are sent to `ENQUIRY_NOTIFICATION_WEBHOOK_URL` as a JSON POST. Configure an HTTPS endpoint in your automation/email provider and test a submission. Delivery failures are logged by the API; the enquiry is still saved in MongoDB.
+- The admin dashboard supports staff assignment, follow-up dates and an activity history. Assignments are currently free-text names; configure staff names with the team and use consistent spelling.
+- Set `NEXT_PUBLIC_GA_ID` in the client deployment to enable Google Analytics. Track form submissions in your analytics property before relying on campaign reports.
+- Configure MongoDB Atlas automated backups or a scheduled `mongodump` to private, access-controlled storage. Periodically verify a restore; the app does not create backups itself.
+- Use HTTPS, restrict `ALLOWED_ORIGINS`, use unique production credentials, and configure host-level error monitoring and uptime alerts. `GET /api/health` is available for uptime checks.
+- Add real project photos only with customer permission. Replace the portfolio placeholders with verified work and add review links only after confirming the correct business profile URL. Do not publish invented testimonials, warranty promises or service coverage.
+- Review keyboard focus, form labels, contrast and mobile layouts on real devices before launch. The site currently has an English interface; the navigation includes an initial Nepali label toggle, while full Nepali translation remains a content task.
+- Online quotation/payment, customer accounts, SMS reminders, individual staff accounts and role permissions are not implemented. They need business process decisions and external provider configuration before they can be safely enabled.
+
 ## Production deployment
 
 For a simple Docker-based deployment, run:
