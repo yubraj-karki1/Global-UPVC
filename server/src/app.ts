@@ -10,7 +10,8 @@ dotenv.config({ path: new URL("../.env", import.meta.url) });
 
 export const app = express();
 app.disable("x-powered-by");
-app.set("trust proxy", process.env.TRUST_PROXY === "true" ? 1 : false);
+const trustedProxyHops = Number(process.env.TRUST_PROXY_HOPS);
+app.set("trust proxy", process.env.TRUST_PROXY === "true" && Number.isInteger(trustedProxyHops) ? trustedProxyHops : false);
 app.use((_req, res, next) => {
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Frame-Options", "DENY");

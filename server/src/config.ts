@@ -24,6 +24,19 @@ export function validateServerEnv() {
   }
 
   if (process.env.NODE_ENV === "production") {
+    const productionOrigins = getAllowedOrigins();
+    if (productionOrigins.length === 0 || productionOrigins.some((origin) => /^https?:\/\/localhost(?::\d+)?$/i.test(origin))) {
+      throw new Error("ALLOWED_ORIGINS must contain the production website origin in production.");
+    }
+    if (productionOrigins.some((origin) => !origin.startsWith("https://"))) {
+      throw new Error("ALLOWED_ORIGINS must use HTTPS in production.");
+    }
+    if (process.env.TRUST_PROXY === "true" && !process.env.TRUST_PROXY_HOPS) {
+      throw new Error("TRUST_PROXY_HOPS must be set when TRUST_PROXY=true in production.");
+    }
+    if (process.env.TRUST_PROXY_HOPS && !/^\d+$/.test(process.env.TRUST_PROXY_HOPS)) {
+      throw new Error("TRUST_PROXY_HOPS must be a non-negative integer.");
+    }
     if (process.env.ADMIN_PASSWORD === "GlobalUPVC@Admin2026") {
       throw new Error("ADMIN_PASSWORD must be changed before production deployment.");
     }

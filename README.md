@@ -1,34 +1,37 @@
 # Global UPVC Windows & Prefab Homes
 
-A full-stack marketing site for Global Hardware and Prefab Pvt. Ltd. The monorepo contains a Next.js frontend in `client` and an Express/Mongoose API in `server`.
+A full-stack marketing site for Global Hardware and Prefab Pvt. Ltd. The npm workspace contains a Next.js frontend in `client` and an Express/Mongoose API in `server`.
 
 ## Project structure
 
 ```text
 global-upvc/
-├── client/                 # Next.js frontend
-│   ├── app/                # App router pages and layouts
-│   ├── components/         # UI components and dashboard
-│   ├── lib/                # Product data and shared logic
-│   ├── public/             # Static assets and images
-│   ├── .env.example        # Client env example
-│   ├── .env.local          # Local client env (not committed)
-│   └── package.json
-├── server/                 # Express API and Mongoose models
-│   ├── src/                # App code, routes, middleware, services
-│   ├── .env.example        # Server env example
-│   ├── .env                # Local server env (not committed)
+├── client/                         # Next.js website
+│   ├── app/                        # Routes, layouts and global styles
+│   ├── components/                 # Shared UI components
+│   ├── lib/                        # Product data and helpers
+│   ├── public/images/              # Static image assets
+│   ├── .env.example                # Client environment template
 │   ├── Dockerfile
 │   └── package.json
-├── scripts/                # Local startup helpers
-├── docker-compose.yml      # MongoDB + app orchestration
-├── .env.example            # Root env template for shared values
-├── package.json            # Root workspace scripts
-├── README.md
-├── .gitignore
-├── server/.dockerignore
-├── client/.dockerignore
-└── node_modules/           # Installed dependencies
+├── server/                         # Express API
+│   ├── src/
+│   │   ├── middleware/             # Authentication and rate limiting
+│   │   ├── models/                 # Mongoose models
+│   │   ├── routes/                 # API endpoints
+│   │   ├── services/               # Notifications and integrations
+│   │   ├── app.ts                  # Express app configuration
+│   │   ├── config.ts               # Environment validation
+│   │   └── index.ts                # API entry point
+│   ├── .env.example                # Server environment template
+│   ├── Dockerfile
+│   └── package.json
+├── scripts/                        # Local start helpers
+├── .env.example                    # Root environment template
+├── docker-compose.yml              # MongoDB and app services
+├── package.json                    # npm workspaces and shared commands
+├── package-lock.json
+└── README.md
 ```
 
 ## Local setup
@@ -80,7 +83,7 @@ The admin API uses an eight-hour signed bearer token. `GET /api/enquiries`, `PAT
 - Configure MongoDB Atlas automated backups or a scheduled `mongodump` to private, access-controlled storage. Periodically verify a restore; the app does not create backups itself.
 - Use HTTPS, restrict `ALLOWED_ORIGINS`, use unique production credentials, and configure host-level error monitoring and uptime alerts. `GET /api/health` is available for uptime checks.
 - Add real project photos only with customer permission. Replace the portfolio placeholders with verified work and add review links only after confirming the correct business profile URL. Do not publish invented testimonials, warranty promises or service coverage.
-- Review keyboard focus, form labels, contrast and mobile layouts on real devices before launch. The site currently has an English interface; the navigation includes an initial Nepali label toggle, while full Nepali translation remains a content task.
+- Review keyboard focus, form labels, contrast and mobile layouts on real devices before launch. The current site is English-only; publish a complete reviewed Nepali translation before advertising Nepali-language support.
 - Online quotation/payment, customer accounts, SMS reminders, individual staff accounts and role permissions are not implemented. They need business process decisions and external provider configuration before they can be safely enabled.
 
 ## Production deployment
@@ -91,10 +94,14 @@ For a simple Docker-based deployment, run:
 docker compose up --build -d
 ```
 
-This starts:
+This starts MongoDB on `localhost:27017`, the API on `http://localhost:5000`, and the frontend on `http://localhost:3000`. The defaults are for local use. For a public deployment, set these variables before building:
 
-- MongoDB on `localhost:27017`
-- API on `http://localhost:5000`
-- Frontend on `http://localhost:3000`
+```env
+NEXT_PUBLIC_SITE_URL=https://www.example.com
+NEXT_PUBLIC_API_URL=https://api.example.com
+ALLOWED_ORIGINS=https://www.example.com
+```
+
+`NEXT_PUBLIC_API_URL` is embedded in the frontend at image build time, so provide it when running `docker compose build` (for example, through a root `.env` file). `ALLOWED_ORIGINS`, `TRUST_PROXY`, and `TRUST_PROXY_HOPS` are read by the API at runtime. Use the exact trusted proxy hop count for your hosting setup. Put the site and API behind HTTPS reverse proxies, and do not expose the MongoDB port publicly.
 
 For a hosted production build, set the same environment values in your server or PaaS settings and keep `ADMIN_PASSWORD` and `JWT_SECRET` private.
