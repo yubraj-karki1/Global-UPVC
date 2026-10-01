@@ -1,43 +1,54 @@
 services:
   mongodb:
     image: mongo:7
-    container_name: global-upvc-mongodb
     restart: unless-stopped
-    ports:
-      - "27017:27017"
     volumes:
       - global-upvc-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   server:
     build:
       context: ./server
-    container_name: global-upvc-server
     restart: unless-stopped
     env_file:
       - ./server/.env
     environment:
+      NODE_ENV: production
       PORT: 5000
       MONGODB_URI: mongodb://mongodb:27017/global-upvc
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000}
-      TRUST_PROXY: ${TRUST_PROXY:-false}
-      TRUST_PROXY_HOPS: ${TRUST_PROXY_HOPS:-1}
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
     ports:
-      - "5000:5000"
+      - "${API_PORT:-5000}:5000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:5000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
   client:
     build:
       context: ./client
-    container_name: global-upvc-client
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:?Set NEXT_PUBLIC_API_URL to the public API URL}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:?Set NEXT_PUBLIC_SITE_URL to the public website URL}
     restart: unless-stopped
     environment:
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:5000}
-      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
     depends_on:
-      - server
+      server:
+        condition: service_healthy
     ports:
-      - "3000:3000"
+      - "${WEB_PORT:-3000}:3000"
 
 volumes:
   global-upvc-data:

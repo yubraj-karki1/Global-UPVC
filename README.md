@@ -88,20 +88,13 @@ The admin API uses an eight-hour signed bearer token. `GET /api/enquiries`, `PAT
 
 ## Production deployment
 
-For a simple Docker-based deployment, run:
+The Compose deployment runs the website and API containers and keeps MongoDB private on the Compose network. Use MongoDB Atlas or another managed MongoDB service for production data; the bundled MongoDB service is intended for local use and does not configure authentication or backups.
 
-```bash
-docker compose up --build -d
-```
+1. Copy `.env.production.example` to `.env` and set the real public HTTPS URLs, Atlas connection string, allowed website origin, and unique admin credentials and JWT secret. The root `.env` is ignored by Git. Do not commit it or share its values.
+2. Set `TRUST_PROXY=true` and `TRUST_PROXY_HOPS` to the actual proxy count only if your API is behind a trusted reverse proxy. Configure HTTPS at your hosting platform or reverse proxy.
+3. Set DNS and proxy routing so the website URL reaches port 3000 and the API URL reaches port 5000. Restrict access to the API at the proxy if it should not be directly reachable. Do not expose MongoDB.
+4. Deploy with `docker compose --env-file .env up --build -d` and check `docker compose ps` and `https://api.example.com/api/health`.
 
-This starts MongoDB on `localhost:27017`, the API on `http://localhost:5000`, and the frontend on `http://localhost:3000`. The defaults are for local use. For a public deployment, set these variables before building:
+`NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_SITE_URL` are public build arguments embedded in the frontend image. Rebuild the client after changing either value. The rest of the settings are passed to the API at runtime. On a managed host that builds each Dockerfile separately, configure those two public build arguments for the client and configure the API variables from the production example as runtime secrets.
 
-```env
-NEXT_PUBLIC_SITE_URL=https://www.example.com
-NEXT_PUBLIC_API_URL=https://api.example.com
-ALLOWED_ORIGINS=https://www.example.com
-```
-
-`NEXT_PUBLIC_API_URL` is embedded in the frontend at image build time, so provide it when running `docker compose build` (for example, through a root `.env` file). `ALLOWED_ORIGINS`, `TRUST_PROXY`, and `TRUST_PROXY_HOPS` are read by the API at runtime. Use the exact trusted proxy hop count for your hosting setup. Put the site and API behind HTTPS reverse proxies, and do not expose the MongoDB port publicly.
-
-For a hosted production build, set the same environment values in your server or PaaS settings and keep `ADMIN_PASSWORD` and `JWT_SECRET` private.
+The Docker Compose file publishes only the website and API ports; MongoDB has no host port. For persistence, use a managed database with access controls and backups. Configure host-level monitoring and verify a database restore before relying on production enquiries.
