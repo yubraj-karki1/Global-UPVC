@@ -5,17 +5,17 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "#F4F7F5",
+        background: "#F3F6FA",
         panel: "#FFFFFF",
-        ink: "#16232B",
-        "ink-soft": "#4C5B63",
-        accent: "#168A91",
-        "accent-deep": "#087078",
-        brass: "#E49A49",
-        coral: "#E46C5B",
-        mint: "#DDF1E8",
-        "sky-soft": "#DDEFF4",
-        line: "#C9D9D5"
+        ink: "#101820",
+        "ink-soft": "#58677A",
+        accent: "#3478C8",
+        "accent-deep": "#1557A0",
+        brass: "#70A7E8",
+        coral: "#3478C8",
+        mint: "#DCEBFA",
+        "sky-soft": "#E6F0FC",
+        line: "#D5DFEB"
       },
       fontFamily: {
         heading: ["var(--font-space-grotesk)"],

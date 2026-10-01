@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { WindowMark } from "./WindowMark";
+import Image from "next/image";
 
 const links = [
   ["Products", "/#products"],
@@ -14,11 +14,10 @@ const links = [
 export function Header() {
   const [open, setOpen] = useState(false);
   return (
-    <header className="sticky top-0 z-50 border-b border-line bg-[#f8faf8]/95 backdrop-blur-md">
-      <div className="shell flex h-[72px] items-center justify-between">
-        <a href="/" className="group flex items-center gap-3 font-heading text-sm font-bold leading-tight tracking-tight focus-ring" aria-label="Global UPVC home">
-          <WindowMark className="h-9 w-9 transition-transform group-hover:scale-110" />
-          <span>GLOBAL UPVC<br /><span className="font-body text-[10px] font-semibold tracking-[.15em] text-ink-soft">WINDOWS &amp; PREFAB</span></span>
+    <header className="sticky top-0 z-50 border-b border-line bg-background/95 backdrop-blur-md">
+      <div className="shell flex h-[76px] items-center justify-between gap-5">
+        <a href="/" className="flex shrink-0 items-center focus-ring" aria-label="Global UPVC home">
+          <Image src="/images/global-upvc-logo.png" alt="Global UPVC — Windows & Prefab" width={155} height={47} priority className="h-auto w-[112px] max-w-[40vw] object-contain sm:w-[124px]" />
         </a>
         <nav className="hidden items-center gap-7 md:flex" aria-label="Main navigation">
           {links.map(([linkLabel, href]) => <a className="nav-link focus-ring" href={href} key={href}>{linkLabel}</a>)}

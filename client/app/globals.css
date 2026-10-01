@@ -2,6 +2,48 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  color-scheme: light;
+  --paper: #f3f6fa;
+  --white: #ffffff;
+  --forest: #1557a0;
+  --forest-deep: #0c1726;
+  --clay: #3478c8;
+  --sand: #b8d7f5;
+  --muted: #58677a;
+  --rule: #d5dfeb;
+}
+
+@layer base {
+  * { border-color: var(--rule); }
+  html { scroll-behavior: smooth; }
+  body { background: var(--paper); color: #101820; }
+  ::selection { background: var(--sand); color: var(--forest-deep); }
+}
+
+@layer components {
+  .shell { max-width: 1380px; }
+  .section-space { padding-top: 5.5rem; padding-bottom: 5.5rem; }
+  .eyebrow { font-family: var(--font-work-sans); color: var(--clay); font-size: 10px; letter-spacing: .2em; }
+  .button { border-radius: 2px; font-family: var(--font-work-sans); letter-spacing: .01em; }
+  .button-primary { border-color: var(--forest); background: var(--forest); }
+  .button-primary:hover { border-color: var(--clay); background: var(--clay); }
+  .button-outline { border-color: #8394aa; }
+  .button-outline:hover { border-color: var(--forest); background: var(--forest); }
+  .nav-link { font-family: var(--font-work-sans); font-size: 12px; font-weight: 600; }
+  .corner-joint { display: none; }
+  .outline-number { font-family: var(--font-work-sans); color: var(--clay); -webkit-text-stroke: 0; }
+  .field { border-radius: 2px; background: var(--white); }
+}
+
+body { font-family: var(--font-work-sans), sans-serif; }
+header.sticky { background: rgba(243,246,250,.96); border-color: var(--rule); backdrop-filter: blur(10px); }
+.window-mark > span { background: linear-gradient(145deg, #dceafa, #85b9eb); }
+.cta-road { background: var(--forest); }
+@media (max-width: 640px) {
+  .section-space { padding-top: 3.75rem; padding-bottom: 3.75rem; }
+}
+
 @layer base {
   * { @apply border-line; }
   html { scroll-behavior: smooth; }
@@ -20,14 +62,14 @@
   .focus-ring { @apply outline-none focus-visible:ring-2 focus-visible:ring-brass focus-visible:ring-offset-2 focus-visible:ring-offset-background; }
   .product-card { @apply relative min-h-64 border border-line bg-panel p-7 transition-colors duration-200 hover:bg-background; }
   .corner-joint { @apply absolute bottom-4 right-4 h-5 w-5 border-b-2 border-r-2 border-brass; }
-  .outline-number { font-family: var(--font-space-grotesk); font-size: 3.25rem; line-height: 1; font-weight: 700; color: transparent; -webkit-text-stroke: 1px #B08549; }
+  .outline-number { font-family: var(--font-space-grotesk); font-size: 3.25rem; line-height: 1; font-weight: 700; color: transparent; -webkit-text-stroke: 1px #70A7E8; }
   .field-label { @apply grid gap-2 text-sm font-semibold; }
   .field { @apply block min-w-0 max-w-full border border-line bg-background px-3 py-3 font-body text-base font-normal text-ink outline-none placeholder:text-ink-soft/60 transition-colors duration-200 focus-visible:border-accent focus-visible:bg-white sm:px-4; }
   .contact-link { @apply underline decoration-line underline-offset-4 transition-colors hover:text-accent-deep hover:decoration-accent-deep; }
   .legal-copy { @apply grid gap-4 leading-7 text-ink-soft; }
   .legal-copy h2 { @apply mt-6 font-heading text-2xl font-semibold text-ink; }
   .window-mark { @apply grid grid-cols-2 grid-rows-2 gap-[3px] border-[3px] border-current bg-current p-[3px] text-accent-deep; }
-  .window-mark > span { background: linear-gradient(145deg, #d8ebf2 0%, #8fc1d7 100%); }
+  .window-mark > span { background: linear-gradient(145deg, #dceafa 0%, #85b9eb 100%); }
 }
 
 .nav-link { @apply relative font-heading text-sm font-semibold text-ink-soft transition-all duration-200 hover:text-accent-deep; }
@@ -39,7 +81,7 @@ img, video, iframe { max-width: 100%; }
   .shell { padding-left: 1rem; padding-right: 1rem; }
   .section-space { padding-top: 3.5rem; padding-bottom: 3.5rem; }
 }
-.cta-road { background: #087078; }
+.cta-road { background: #1557a0; }
 .cta-road::before, .cta-road::after { display: none; }
 @keyframes window-in { from { opacity: 0; transform: translateY(24px) scale(.96); } to { opacity: 1; transform: none; } }
 @keyframes fade-in-up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
@@ -47,3 +89,8 @@ img, video, iframe { max-width: 100%; }
 .fade-in { animation: fade-in-up 700ms cubic-bezier(.2,.8,.2,1) both; }
 .slide-in { animation: slide-in-right 700ms cubic-bezier(.2,.8,.2,1) both; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
+
+/* Blue accents used by the brand mark and page details. */
+.cta-road { background: #0c1726; }
+.window-mark { border: 0; padding: 0; gap: 3px; background: #1557a0; color: #1557a0; }
+.window-mark > span { background: linear-gradient(145deg, #e5f1fc, #9dc8f0); }

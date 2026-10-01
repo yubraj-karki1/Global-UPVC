@@ -12,3 +12,10 @@ export function LineIcon({ name }: { name: IconName }) {
   };
   return <svg viewBox="0 0 24 24" className="h-8 w-8" aria-hidden="true" {...common}>{paths[name]}</svg>;
 }
+
+export function BrandIcon({ name, className = "" }: { name: "facebook" | "instagram" | "whatsapp"; className?: string }) {
+  const common = { fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+  if (name === "facebook") return <svg viewBox="0 0 24 24" className={className} aria-hidden="true"><path fill="currentColor" d="M13.5 21v-8h2.7l.4-3.1h-3.1v-2c0-.9.3-1.5 1.6-1.5h1.7V3.6c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3v2.1H7.3V13h2.8v8z" /></svg>;
+  if (name === "instagram") return <svg viewBox="0 0 24 24" className={className} aria-hidden="true" {...common}><rect x="3.2" y="3.2" width="17.6" height="17.6" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.8" cy="6.5" r=".8" fill="currentColor" stroke="none" /></svg>;
+  return <svg viewBox="0 0 24 24" className={className} aria-hidden="true" {...common}><path d="M20.5 11.7a8.3 8.3 0 0 1-12.3 7.2L3 20l1.2-5a8.3 8.3 0 1 1 16.3-3.3Z" /><path d="M8.5 8.3c.2-.5.5-.6.9-.6h.5c.2 0 .4.1.5.4l.8 1.8c.1.2.1.4-.1.6l-.6.7c-.2.2-.2.4 0 .6.6 1 1.4 1.8 2.5 2.4.2.1.4.1.6-.1l.8-.9c.2-.2.4-.2.7-.1l1.7.8c.3.1.4.3.4.5 0 .3-.1 1.1-.6 1.5-.5.5-1.2.7-1.9.6-1-.1-2.3-.7-3.8-2-1.8-1.5-2.8-3.3-3-4.4-.2-.9.1-1.5.6-1.8Z" /></svg>;
+}
